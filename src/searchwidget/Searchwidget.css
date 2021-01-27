@@ -1,0 +1,16 @@
+.formContainer {
+    margin: 15px 0px;
+}
+.formContainer input {
+    border: none;
+    border-bottom: 1px solid #bbb;
+    width: 100%;
+    font-size: 20px;
+    margin-bottom: 10px;
+    transition: 0.2s linear;
+}
+
+.formContainer input:focus {
+    outline: none;
+    font-size: 25px;
+}

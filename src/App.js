@@ -1,56 +1,41 @@
 import React from 'react';
 import './App.css';
-import axios from 'axios';
-import ImageContainer from './imagecontainer/ImageContainer';
-import PaginationButtons from './paginationButton/paginationButtons';
-
+import Searchwidget from './searchwidget/Searchwidget';
+import Todolist from './todolist/Todolist';
+import todoArray from './todos.json'
 
 class App extends React.Component {
   state = {
-    imageArr: [],
-    startIndex: 0,
-    limit: 5
+    inputValue: '',
+    todoItems: todoArray,
+    filteredItems: []
   }
   componentDidMount() {
-    this.getImageData();
+    this.filterTodoItems();
+    console.log(this.state.todoItems)
   }
 
-  getImageData = () => {
-    const stateData = this.state;
-    const imgUrl = `https://jsonplaceholder.typicode.com/photos?_start=${stateData.startIndex}&_limit=${stateData.limit}`;
-    axios.get(imgUrl).then((resp) => {
-      this.setState({ imageArr: resp.data })
-    }).catch(err => {
-      console.log(err.message)
-      this.setState({ imageArr: [] })
-    });
+  filterTodoItems = () => {
+    const filterValue = this.state.inputValue;
+    const todoList = [...this.state.todoItems]
+    if (filterValue) {
+      const filteredArr = todoList.filter((todoObj) => todoObj.title.toLocaleLowerCase().search(filterValue) !== -1);
+      this.setState({ filteredItems: filteredArr })
+    } else {
+      this.setState({ filteredItems: todoList })
+    }
+
   }
 
-  prevButtonHandler = () => {
-    const stateData = this.state;
-    const newStartIndex = stateData.startIndex - stateData.limit;
-    this.setState({ startIndex: newStartIndex }, this.getImageData);
+  inputChangeHandler = (value) => {
+    this.setState((prev) => ({ inputValue: value }), this.filterTodoItems)
   }
-
-  nextButtonHandler = () => {
-    const stateData = this.state;
-    const newStartIndex = stateData.startIndex + stateData.limit;
-    this.setState({ startIndex: newStartIndex }, this.getImageData);
-  }
-
   render() {
-    const { imageArr, startIndex } = this.state;
+
     return (
       <div className="App">
-        <header className="App-header">
-          <h4>Image Pagination APP !</h4>
-        </header>
-        <section>
-          {imageArr?.length >= 0 ? <ImageContainer imageArr={imageArr} /> : null}
-        </section>
-        <section className="buttonHolder">
-          <PaginationButtons prevButtonHandler={this.prevButtonHandler} nextButtonHandler={this.nextButtonHandler} startIndex={startIndex} />
-        </section>
+        <Searchwidget inputChangeHandler={this.inputChangeHandler} filterValue={this.state.inputValue} />
+        <Todolist list={this.state.filteredItems} />
       </div>
     )
   }
