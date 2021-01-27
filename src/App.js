@@ -1,48 +1,60 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
 import axios from 'axios';
 import ImageContainer from './imagecontainer/ImageContainer';
 import PaginationButtons from './paginationButton/paginationButtons';
-function App() {
-  const [limit, setLimit] = useState(5);
-  const [startIndex, setStartIndex] = useState(0)
-  const [imageArr, setImageArr] = useState([]);
 
-  useEffect(() => {
-    async function getImageData() {
-      try {
-        const imgUrl = `https://jsonplaceholder.typicode.com/photos?_start=${startIndex}&_limit=${limit}`;
-        const response = await axios.get(imgUrl);
-        setImageArr(response.data);
-      } catch (err) {
-        console.error(err.message)
-      }
-    }
-    getImageData();
-  }, [startIndex])
-  const prevButtonHandler = () => {
-    const newStartIndex = startIndex - limit;
-    setStartIndex(newStartIndex);
+
+class App extends React.Component {
+  state = {
+    imageArr: [],
+    startIndex: 0,
+    limit: 5
   }
-  const nextButtonHandler = () => {
-    const newStartIndex = startIndex + limit;
-    setStartIndex(newStartIndex);
+  componentDidMount() {
+    this.getImageData();
   }
 
-  return (
-    <div className="App">
-      <header className="App-header">
-        <h4>Image Pagination APP !!!</h4>
-      </header>
-      <section>
-        <ImageContainer imageArr={imageArr} />
-      </section>
-      <section className="buttonHolder">
-        <PaginationButtons prevButtonHandler={prevButtonHandler} nextButtonHandler={nextButtonHandler} startIndex={startIndex} />
-      </section>
-    </div>
-  );
+  getImageData = () => {
+    const stateData = this.state;
+    const imgUrl = `https://jsonplaceholder.typicode.com/photos?_start=${stateData.startIndex}&_limit=${stateData.limit}`;
+    axios.get(imgUrl).then((resp) => {
+      this.setState({ imageArr: resp.data })
+    }).catch(err => {
+      console.log(err.message)
+      this.setState({ imageArr: [] })
+    });
+  }
+
+  prevButtonHandler = () => {
+    const stateData = this.state;
+    const newStartIndex = stateData.startIndex - stateData.limit;
+    this.setState({ startIndex: newStartIndex }, this.getImageData);
+  }
+
+  nextButtonHandler = () => {
+    const stateData = this.state;
+    const newStartIndex = stateData.startIndex + stateData.limit;
+    this.setState({ startIndex: newStartIndex }, this.getImageData);
+  }
+
+  render() {
+    const { imageArr, startIndex } = this.state;
+    return (
+      <div className="App">
+        <header className="App-header">
+          <h4>Image Pagination APP !</h4>
+        </header>
+        <section>
+          {imageArr?.length >= 0 ? <ImageContainer imageArr={imageArr} /> : null}
+        </section>
+        <section className="buttonHolder">
+          <PaginationButtons prevButtonHandler={this.prevButtonHandler} nextButtonHandler={this.nextButtonHandler} startIndex={startIndex} />
+        </section>
+      </div>
+    )
+  }
 }
+
 
 export default App;
